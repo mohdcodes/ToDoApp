@@ -16,7 +16,7 @@ const formatDate = (ms) => {
   return `${day}/${month}/${year} - ${hrs}:${min}:${sec}`;
 };
 const NoteDetail = (props) => {
-  // const { setNotes } = useNotes();
+  const { setNotes } = useNotes();
   const [note, setNote] = useState(props.route.params.note);
   const deleteNote = async () => {
     const result = await AsyncStorage.getItem('notes');
@@ -24,7 +24,7 @@ const NoteDetail = (props) => {
     if (result !== null) notes = JSON.parse(result);
 
     const newNotes = notes.filter((n) => n.id !== note.id);
-    // setNotes(newNotes);
+    setNotes(newNotes);
     await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
     props.navigation.goBack();
   };
