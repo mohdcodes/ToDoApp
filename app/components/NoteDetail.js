@@ -4,6 +4,7 @@ import colors from '../Colors/colors';
 import StartPageSubmitButton from './StartPageSubmitButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNotes } from '../context/NoteProvider';
+import NoteInputModel from './NoteInputModel';
 const formatDate = (ms) => {
   const date = new Date(ms);
   const day = date.getDate();
@@ -16,6 +17,8 @@ const formatDate = (ms) => {
   return `${day}/${month}/${year} - ${hrs}:${min}:${sec}`;
 };
 const NoteDetail = (props) => {
+  const [isEdit, setIsEdit] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const { setNotes } = useNotes();
   const [note, setNote] = useState(props.route.params.note);
   const deleteNote = async () => {
@@ -47,7 +50,39 @@ const NoteDetail = (props) => {
       }
     );
   };
+  const openEditModal = () => {
+    setIsEdit(true);
+    setShowModal(true);
+  };
+  const handleUpdate = async (
+    event,
+    organiserName,
+    contact,
+    email,
+    address,
+    time
+  ) => {
+    const result = await AsyncStorage.getItem('notes');
+    let notes = [];
+    if (result !== null) notes = JSON.parse(result);
 
+    const newNotes = notes.filter((n) => {
+      if (n.id === note.id) {
+        n.event = event;
+        n.organiserName = organiserName;
+        n.contact = contact;
+        n.address = address;
+        n.email = email;
+        n.isUpdated = true;
+        n.time = time;
+        setNote(n);
+      }
+      return n;
+    });
+    setNotes(newNotes);
+    await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
+  };
+  const handleOnClose = () => setShowModal(false);
   return (
     <View
       style={[
@@ -88,8 +123,15 @@ const NoteDetail = (props) => {
           style={{ backgroundColor: colors.ERROR, marginBottom: 15 }}
           onPress={displayDeleteAlert}
         />
-        <StartPageSubmitButton antIconName="edit" />
+        <StartPageSubmitButton antIconName="edit" onPress={openEditModal} />
       </View>
+      <NoteInputModel
+        isEdit={isEdit}
+        note={note}
+        onClose={handleOnClose}
+        onSubmit={handleUpdate}
+        visible={showModal}
+      />
     </View>
   );
 };

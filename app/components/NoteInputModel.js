@@ -9,11 +9,11 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import colors from '../Colors/colors';
 import StartPageSubmitButton from './StartPageSubmitButton';
 
-const NoteInputModel = ({ visible, onClose, onSubmit }) => {
+const NoteInputModel = ({ visible, onClose, onSubmit, note, isEdit }) => {
   const [event, setEvent] = useState('');
   const [organiserName, setOrganiserName] = useState('');
   const [contact, setContact] = useState('');
@@ -24,6 +24,16 @@ const NoteInputModel = ({ visible, onClose, onSubmit }) => {
     Keyboard.dismiss();
   };
 
+  useEffect(() => {
+    if (isEdit) {
+      setEvent(note.event);
+      setOrganiserName(note.organiserName);
+      setAddress(note.address);
+      setContact(note.contact);
+      setEmail(note.email);
+    }
+  }, [isEdit]);
+
   const handleOnChangeText = (text, valueFor) => {
     if (valueFor === 'Event') setEvent(text);
     if (valueFor === 'OrganiserName') setOrganiserName(text);
@@ -33,17 +43,6 @@ const NoteInputModel = ({ visible, onClose, onSubmit }) => {
   };
   //   console.log(event);
 
-  setFunction = () => {
-    return [
-      setEvent(''),
-      setOrganiserName(''),
-      setContact(''),
-      setEmail(''),
-      setAddress(''),
-      onClose(),
-    ];
-  };
-
   const handlSubmitInput = () => {
     if (
       !event.trim() &&
@@ -51,11 +50,29 @@ const NoteInputModel = ({ visible, onClose, onSubmit }) => {
       !contact.trim() &&
       !email.trim() &&
       !address.trim()
-    ) {
+    )
       return onClose();
+    if (isEdit) {
+      onSubmit(event, organiserName, contact, email, address, Date.now());
+    } else {
+      onSubmit(event, organiserName, contact, email, address);
+      setEvent(''),
+        setOrganiserName(''),
+        setContact(''),
+        setEmail(''),
+        setAddress('');
     }
-    onSubmit(event, organiserName, contact, email, address);
-    setFunction();
+    onClose();
+  };
+  const closeModal = () => {
+    if (!isEdit) {
+      setEvent(''),
+        setOrganiserName(''),
+        setContact(''),
+        setEmail(''),
+        setAddress('');
+    }
+    onClose();
   };
 
   return (
@@ -186,7 +203,7 @@ const NoteInputModel = ({ visible, onClose, onSubmit }) => {
               <StartPageSubmitButton
                 size={15}
                 antIconName="close"
-                onPress={setFunction}
+                onPress={closeModal}
               />
             ) : null}
           </View>
