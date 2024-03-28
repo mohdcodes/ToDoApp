@@ -14,12 +14,36 @@ import NoteInputModel from '../components/NoteInputModel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Note from '../components/Note';
 import { useNotes } from '../context/NoteProvider';
+import { AntDesign } from '@expo/vector-icons';
+import NotFound from '../components/NotFound';
 
 const NoteScreenn = ({ user, navigation }) => {
-  const { notes, setNotes } = useNotes();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { notes, setNotes, findNotes } = useNotes();
   const [greet, setGreet] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [searchNotFound, setSearchNotFound] = useState(false);
+  const handleOnSearchInput = async (text) => {
+    if (!text.trim()) {
+      setSearchNotFound(false);
+      setSearchQuery('');
+      return await findNotes();
+    }
+    setSearchQuery(text);
+    const filteredNotes = notes.filter((note) => {
+      if (
+        note.event.toLowerCase().includes(text.toLowerCase()) ||
+        note.organiserName.toLowerCase().includes(text.toLowerCase())
+      ) {
+        return note;
+      }
+    });
+    if (filteredNotes.length) {
+      setNotes([...filteredNotes]);
+    } else {
+      setSearchNotFound(true);
+    }
+  };
   const findTimeToGreet = () => {
     const hrs = new Date().getHours();
     0;
@@ -59,7 +83,11 @@ const NoteScreenn = ({ user, navigation }) => {
   const openNote = (note) => {
     navigation.navigate('NoteDetail', { note });
   };
-
+  const handleOnClear = async () => {
+    setSearchQuery('');
+    setSearchNotFound(false);
+    await findNotes();
+  };
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -67,21 +95,31 @@ const NoteScreenn = ({ user, navigation }) => {
           <Text
             style={styles.greetUserText}
           >{`Good ${greet} ${user.name} 🥳`}</Text>
-          {notes.length ? <SearchBar /> : null}
+          {notes.length ? (
+            <SearchBar
+              value={searchQuery}
+              onChangeText={handleOnSearchInput}
+              onClear={handleOnClear}
+            />
+          ) : null}
 
           <View>
-            <FlatList
-              columnWrapperStyle={{
-                justifyContent: 'space-between',
-                marginBottom: 10,
-              }}
-              numColumns={2}
-              data={notes}
-              renderItem={({ item }) => (
-                <Note onPress={() => openNote(item)} item={item} />
-              )}
-              // keyExtractor={(item) => item.id.toString()}
-            />
+            {searchNotFound ? (
+              <NotFound />
+            ) : (
+              <FlatList
+                columnWrapperStyle={{
+                  justifyContent: 'space-between',
+                  marginBottom: 10,
+                }}
+                numColumns={2}
+                data={notes}
+                renderItem={({ item }) => (
+                  <Note onPress={() => openNote(item)} item={item} />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+              />
+            )}
           </View>
           {!notes.length ? (
             <View style={[styles.subContainer, StyleSheet.absoluteFillObject]}>
