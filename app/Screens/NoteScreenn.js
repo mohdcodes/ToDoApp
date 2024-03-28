@@ -14,8 +14,17 @@ import NoteInputModel from '../components/NoteInputModel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Note from '../components/Note';
 import { useNotes } from '../context/NoteProvider';
-import { AntDesign } from '@expo/vector-icons';
 import NotFound from '../components/NotFound';
+
+const reverseDataOfNotes = (data) => {
+  return data.sort((a, b) => {
+    const aInt = parseInt(a.time);
+    const bInt = parseInt(b.time);
+    if (aInt < bInt) return 1;
+    if (aInt == bInt) return 0;
+    if (aInt > bInt) return -1;
+  });
+};
 
 const NoteScreenn = ({ user, navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,6 +64,8 @@ const NoteScreenn = ({ user, navigation }) => {
     findTimeToGreet();
     // AsyncStorage.clear();
   }, []);
+  const reversedNotes = reverseDataOfNotes(notes);
+
   const handleOnSubmit = async (
     event,
     organiserName,
@@ -102,25 +113,22 @@ const NoteScreenn = ({ user, navigation }) => {
               onClear={handleOnClear}
             />
           ) : null}
-
-          <View>
-            {searchNotFound ? (
-              <NotFound />
-            ) : (
-              <FlatList
-                columnWrapperStyle={{
-                  justifyContent: 'space-between',
-                  marginBottom: 10,
-                }}
-                numColumns={2}
-                data={notes}
-                renderItem={({ item }) => (
-                  <Note onPress={() => openNote(item)} item={item} />
-                )}
-                keyExtractor={(item) => item.id.toString()}
-              />
-            )}
-          </View>
+          {searchNotFound ? (
+            <NotFound />
+          ) : (
+            <FlatList
+              columnWrapperStyle={{
+                justifyContent: 'space-between',
+                marginBottom: 10,
+              }}
+              numColumns={2}
+              data={reversedNotes}
+              renderItem={({ item }) => (
+                <Note onPress={() => openNote(item)} item={item} />
+              )}
+              keyExtractor={(item) => item.id.toString()}
+            />
+          )}
           {!notes.length ? (
             <View style={[styles.subContainer, StyleSheet.absoluteFillObject]}>
               <Text

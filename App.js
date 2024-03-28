@@ -13,22 +13,23 @@ import NoteProvider from './app/context/NoteProvider';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [isFirstTimeOpen, setIsFirstTimeOpen] = useState(false);
   const [user, SetUser] = useState({});
   const findUser = async () => {
     const result = await AsyncStorage.getItem('user');
-    if (result !== null) {
-      SetUser(JSON.parse(result));
-    }
+    if (result === null) return setIsFirstTimeOpen(true);
+    SetUser(JSON.parse(result));
+    setIsFirstTimeOpen(false);
     console.log(result);
   };
+
   useEffect(() => {
     findUser();
-    // AsyncStorage.clear();
   }, []);
 
   const RenderNoteScreenn = (props) => <NoteScreenn {...props} user={user} />;
 
-  if (!user.name) return <StartPage onFinish={findUser} />;
+  if (isFirstTimeOpen) return <StartPage onFinish={findUser} />;
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor={colors.LIGHT} />
