@@ -8,6 +8,7 @@ import colors from './app/Colors/colors';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import NoteDetail from './app/components/NoteDetail';
 import { NavigationContainer } from '@react-navigation/native';
+import NoteProvider from './app/context/NoteProvider';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,23 +33,25 @@ export default function App() {
     <>
       <StatusBar barStyle="dark-content" backgroundColor={colors.LIGHT} />
       <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen
-            component={RenderNoteScreenn}
-            name="NoteScreenn"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            component={NoteDetail}
-            name="NoteDetail"
-            options={{
-              headerTitle: '',
-              headerTransparent: true,
-              headerBackTitle: 'BACK',
-              // headerBackTitleStyle={}
-            }}
-          />
-        </Stack.Navigator>
+        <NoteProvider>
+          <Stack.Navigator>
+            <Stack.Screen
+              component={RenderNoteScreenn}
+              name="NoteScreenn"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              component={NoteDetail}
+              name="NoteDetail"
+              options={{
+                headerTitle: '',
+                headerTransparent: true,
+                headerBackTitle: 'BACK',
+                // headerBackTitleStyle={}
+              }}
+            />
+          </Stack.Navigator>
+        </NoteProvider>
       </NavigationContainer>
     </>
   );
