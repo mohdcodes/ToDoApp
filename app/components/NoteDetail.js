@@ -1,6 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, View, Alert } from 'react-native';
+import React, { useState } from 'react';
 import colors from '../Colors/colors';
+import StartPageSubmitButton from './StartPageSubmitButton';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNotes } from '../context/NoteProvider';
 const formatDate = (ms) => {
   const date = new Date(ms);
   const day = date.getDate();
@@ -13,7 +16,38 @@ const formatDate = (ms) => {
   return `${day}/${month}/${year} - ${hrs}:${min}:${sec}`;
 };
 const NoteDetail = (props) => {
-  const { note } = props.route.params;
+  // const { setNotes } = useNotes();
+  const [note, setNote] = useState(props.route.params.note);
+  const deleteNote = async () => {
+    const result = await AsyncStorage.getItem('notes');
+    let notes = [];
+    if (result !== null) notes = JSON.parse(result);
+
+    const newNotes = notes.filter((n) => n.id !== note.id);
+    // setNotes(newNotes);
+    await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
+    props.navigation.goBack();
+  };
+  const displayDeleteAlert = () => {
+    Alert.alert(
+      'Are You Sure!',
+      'This action will delete your note permanently!',
+      [
+        {
+          text: 'Delete',
+          onPress: deleteNote,
+        },
+        {
+          text: 'No Thanks',
+          onPress: () => console.log('no thanks'),
+        },
+      ],
+      {
+        cancelable: true,
+      }
+    );
+  };
+
   return (
     <View
       style={[
@@ -48,6 +82,14 @@ const NoteDetail = (props) => {
       <Text style={{ fontWeight: '500', fontSize: 14, marginBottom: 15 }}>
         EMAIL:-{note.email}
       </Text>
+      <View style={styles.btnContainer}>
+        <StartPageSubmitButton
+          antIconName="delete"
+          style={{ backgroundColor: colors.ERROR, marginBottom: 15 }}
+          onPress={displayDeleteAlert}
+        />
+        <StartPageSubmitButton antIconName="edit" />
+      </View>
     </View>
   );
 };
@@ -60,5 +102,10 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontSize: 12,
     opacity: 0.5,
+  },
+  btnContainer: {
+    position: 'absolute',
+    right: 15,
+    bottom: 50,
   },
 });
