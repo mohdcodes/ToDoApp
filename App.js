@@ -1,9 +1,9 @@
 // import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet, Text, View, StatusBar } from 'react-native';
-import StartPage from './app/Screeens/StartPage';
+import StartPage from './app/Screens/StartPage';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import NoteScreenn from './app/Screeens/NoteScreenn';
+import NoteScreenn from './app/Screens/NoteScreenn';
 import colors from './app/Colors/colors';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import NoteDetail from './app/components/NoteDetail';
