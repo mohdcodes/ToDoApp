@@ -48,7 +48,6 @@ export default function App() {
                 headerTitle: '',
                 headerTransparent: true,
                 headerBackTitle: 'BACK',
-                // headerBackTitleStyle={}
               }}
             />
           </Stack.Navigator>
